@@ -27,4 +27,3 @@ Icon
 
 # Don't ignore the exports folder completely, but maybe ignore intermediate stls if you don't want them tracked
 # Just allowing exports/ for now but you can configure it
-exports/
