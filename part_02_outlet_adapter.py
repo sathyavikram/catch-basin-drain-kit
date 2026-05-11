@@ -42,6 +42,45 @@ def create_outlet_adapter():
     outer_pipe = make_rounded_cylinder(ADAPTER_OUTER_DIAMETER / 2, ADAPTER_LENGTH, 2.0)
     outer_pipe.translate(FreeCAD.Vector(0, 0, WALL_THICKNESS))
     
+    # 2a. Add outer detent lugs/clips
+    def make_outer_lug(r, z_pos):
+        import math
+        lug_length = 12.0
+        lug_height = 4.0
+        lug_width = 15.0
+        
+        v1 = FreeCAD.Vector(r, 0, z_pos)
+        v2 = FreeCAD.Vector(r + lug_height, 0, z_pos - lug_length)
+        v3 = FreeCAD.Vector(r, 0, z_pos - lug_length)
+        
+        wire = Part.makePolygon([v1, v2, v3, v1])
+        face = Part.Face(wire)
+        
+        swept = face.revolve(FreeCAD.Vector(0,0,0), FreeCAD.Vector(0,0,1), (lug_width / r) * 180 / math.pi)
+        
+        ang = - ((lug_width / r) * 180 / math.pi) / 2.0
+        swept.rotate(FreeCAD.Vector(0,0,0), FreeCAD.Vector(0,0,1), ang)
+        
+        return swept
+
+    lugs = []
+    num_lugs = 6
+    for i in range(num_lugs):
+        angle = i * (360.0 / num_lugs)
+        
+        # Row 1 (near rim, facing the connecting pipe)
+        lug1 = make_outer_lug(ADAPTER_OUTER_DIAMETER / 2, WALL_THICKNESS + ADAPTER_LENGTH - 10.0)
+        lug1.rotate(FreeCAD.Vector(0,0,0), FreeCAD.Vector(0,0,1), angle)
+        lugs.append(lug1)
+        
+        # Row 2 (staggered, further down the adapter)
+        lug2 = make_outer_lug(ADAPTER_OUTER_DIAMETER / 2, WALL_THICKNESS + ADAPTER_LENGTH - 35.0)
+        lug2.rotate(FreeCAD.Vector(0,0,0), FreeCAD.Vector(0,0,1), angle + (180.0 / num_lugs))
+        lugs.append(lug2)
+
+    outer_lugs_comp = Part.makeCompound(lugs)
+    outer_pipe = outer_pipe.fuse(outer_lugs_comp)
+
     # 3. Insertion Neck (goes into the basin wall)
     insertion_len = WALL_THICKNESS + 20.0  # long enough to thread into external collar extensions
     insertion_neck = Part.makeCylinder(OUTLET_DIAMETER / 2 - ADAPTER_TOLERANCE, insertion_len)
