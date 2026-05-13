@@ -3,14 +3,15 @@ import math
 SCALE = 1.0
 
 # General Dimensions
-BASIN_SIZE = 170.0 * SCALE
-BASIN_HEIGHT = 170.0 * SCALE
+BASIN_SIZE = 130.0 * SCALE
+BASIN_HEIGHT = 160.0 * SCALE
 WALL_THICKNESS = 4.0 * SCALE
 
 # Outlet Openings
 OUTLET_DIAMETER = 106.0  # Increased to support 4-inch inner bore plus wall thickness
 OUTLET_HEIGHT_OFFSET = 25.0 * SCALE
 THREAD_NOMINAL_RADIUS = 55.0
+THREAD_CLEARANCE = 1.2
 
 # Grate
 GRATE_THICKNESS = 15.0 * SCALE

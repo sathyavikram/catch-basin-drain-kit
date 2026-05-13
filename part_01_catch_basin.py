@@ -51,7 +51,7 @@ def create_basin():
     
     # Add external collars for threads
     import math
-    def create_lofted_thread(nominal_radius, t_pitch, t_length, is_male, extra_clearance=0.6):
+    def create_lofted_thread(nominal_radius, t_pitch, t_length, is_male, extra_clearance=THREAD_CLEARANCE):
         import math
         t_radius = nominal_radius
         if is_male:
@@ -61,60 +61,25 @@ def create_basin():
         inner_X = t_r_inner - 2.0
         
         if is_male:
-            pts_local = [
-                FreeCAD.Vector(inner_X, 0, -t_pitch*0.35),
-                FreeCAD.Vector(t_radius - 0.2, 0, -t_pitch*0.1),
-                FreeCAD.Vector(t_radius - 0.2, 0,  t_pitch*0.1),
-                FreeCAD.Vector(inner_X, 0,  t_pitch*0.35)
-            ]
+            p1 = FreeCAD.Vector(inner_X, 0, -t_pitch*0.35)
+            p2 = FreeCAD.Vector(t_radius - 0.2, 0, -t_pitch*0.1)
+            p3 = FreeCAD.Vector(t_radius - 0.2, 0,  t_pitch*0.1)
+            p4 = FreeCAD.Vector(inner_X, 0,  t_pitch*0.35)
         else:
-            pts_local = [
-                FreeCAD.Vector(inner_X, 0, -t_pitch*0.35),
-                FreeCAD.Vector(t_radius, 0, -t_pitch*0.1),
-                FreeCAD.Vector(t_radius, 0,  t_pitch*0.1),
-                FreeCAD.Vector(inner_X, 0,  t_pitch*0.35)
-            ]
+            p1 = FreeCAD.Vector(inner_X, 0, -t_pitch*0.35)
+            p2 = FreeCAD.Vector(t_radius, 0, -t_pitch*0.1)
+            p3 = FreeCAD.Vector(t_radius, 0,  t_pitch*0.1)
+            p4 = FreeCAD.Vector(inner_X, 0,  t_pitch*0.35)
             
-        steps = 36
-        num_pitches = t_length / t_pitch
-        total_steps = int(num_pitches * steps) + 1
+        t_wire = Part.Wire(Part.makePolygon([p1, p2, p3, p4, p1]))
+        t_helix = Part.makeHelix(t_pitch, t_length, t_r_inner, 0)
+        t_sweep = Part.Wire(t_helix).makePipeShell([t_wire], True, True)
         
-        vertices = []
-        for i in range(total_steps):
-            z = i * t_length / (total_steps - 1)
-            a = z * 2 * math.pi / t_pitch
-            
-            step_verts = []
-            for p in pts_local:
-                xw = p.x * math.cos(a) - p.y * math.sin(a)
-                yw = p.x * math.sin(a) + p.y * math.cos(a)
-                step_verts.append(FreeCAD.Vector(xw, yw, z + p.z))
-            vertices.append(step_verts)
-            
-        faces = []
-        for i in range(total_steps - 1):
-            for j in range(len(pts_local) - 1):
-                p1, p2 = vertices[i][j], vertices[i+1][j]
-                p3, p4 = vertices[i+1][j+1], vertices[i][j+1]
-                faces.extend([
-                    Part.Face(Part.makePolygon([p1, p2, p3, p1])),
-                    Part.Face(Part.makePolygon([p1, p3, p4, p1]))
-                ])
-            p1, p2 = vertices[i][-1], vertices[i+1][-1]
-            p3, p4 = vertices[i+1][0], vertices[i][0]
-            faces.extend([
-                Part.Face(Part.makePolygon([p1, p2, p3, p1])),
-                Part.Face(Part.makePolygon([p1, p3, p4, p1]))
-            ])
-            
-        faces.extend([
-            Part.Face(Part.makePolygon(vertices[0] + [vertices[0][0]])),
-            Part.Face(Part.makePolygon(vertices[-1][::-1] + [vertices[-1][-1]]))
-        ])
-        
-        t_sweep = Part.Solid(Part.Shell(faces))
         t_core = Part.makeCylinder(t_r_inner, t_length, FreeCAD.Vector(0,0,0))
-        return t_core.fuse(t_sweep).removeSplitter() if is_male else t_core.fuse(t_sweep)
+        res = t_core.fuse(t_sweep)
+        try: res = res.removeSplitter()
+        except: pass
+        return res
 
     y_center = BASIN_SIZE/2
     z_center = OUTLET_HEIGHT_OFFSET + OUTLET_DIAMETER/2

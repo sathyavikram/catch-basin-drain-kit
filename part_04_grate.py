@@ -48,51 +48,32 @@ def create_grate():
     
 
 
-    # Slots pattern
-    slot_x_len = 30.0
-    slot_y_len = 12.0
+    # Slots pattern: Dynamic Full Holes
     rib_thickness = GRATE_RIB_THICKNESS
+    margin = rib_thickness * 1.5
+    avail = grate_size - 2 * margin
     
-    row_step_y = slot_y_len + rib_thickness
-    col_step_x = slot_x_len + rib_thickness
+    cols = 4  # 4 slots wide
+    rows = 7  # 7 slots high
+    
+    # Calculate exact safe sizing for full un-cut holes
+    slot_x = (avail - (cols - 1) * rib_thickness) / cols
+    slot_y = (avail - (rows - 1) * rib_thickness) / rows
     
     cut_bodies = []
     
-    start_x = rib_thickness * 2
-    start_y = rib_thickness * 2
-    max_x = grate_size - rib_thickness * 2
-    max_y = grate_size - rib_thickness * 2
-    
-    y = start_y
-    row_idx = 0
-    while y + slot_y_len <= max_y:
-        x_offset = start_x
-        if row_idx % 2 == 1:
-            x_offset += col_step_x / 2.0
+    for r in range(rows):
+        for c in range(cols):
+            x = margin + c * (slot_x + rib_thickness)
+            y = margin + r * (slot_y + rib_thickness)
             
-        x = x_offset
-        while x + slot_x_len <= max_x:
-            slot = Part.makeBox(slot_x_len, slot_y_len, GRATE_THICKNESS * 3)
+            slot = Part.makeBox(slot_x, slot_y, GRATE_THICKNESS * 3)
+            try:
+                slot = slot.makeFillet(2.0, slot.Edges)
+            except: pass
+            
             slot.translate(FreeCAD.Vector(x, y, -GRATE_THICKNESS))
             cut_bodies.append(slot)
-            x += col_step_x
-            
-        # Edge half-slots for the odd rows
-        if row_idx % 2 == 1:
-            left_len = col_step_x / 2.0 - rib_thickness
-            if left_len > 0:
-                slot_left = Part.makeBox(left_len, slot_y_len, GRATE_THICKNESS * 3)
-                slot_left.translate(FreeCAD.Vector(start_x, y, -GRATE_THICKNESS))
-                cut_bodies.append(slot_left)
-                
-            right_len = max_x - x
-            if right_len > rib_thickness:
-                slot_right = Part.makeBox(right_len, slot_y_len, GRATE_THICKNESS * 3)
-                slot_right.translate(FreeCAD.Vector(x, y, -GRATE_THICKNESS))
-                cut_bodies.append(slot_right)
-
-        y += row_step_y
-        row_idx += 1
         
     if cut_bodies:
         compound_cut = Part.makeCompound(cut_bodies)
