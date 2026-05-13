@@ -86,8 +86,14 @@ def create_outlet_adapter():
     insertion_neck = Part.makeCylinder(OUTLET_DIAMETER / 2 - ADAPTER_TOLERANCE, insertion_len)
     insertion_neck.translate(FreeCAD.Vector(0, 0, -insertion_len))
     
+    # 4. Transition Cone (gradual taper from flange to the outward pipe for strength/flow)
+    taper_length = 20.0
+    from config import THREAD_NOMINAL_RADIUS
+    # Start the cone at the flange (Z = WALL_THICKNESS) going outward to the outer pipe
+    transition_cone = Part.makeCone(THREAD_NOMINAL_RADIUS, ADAPTER_OUTER_DIAMETER / 2, taper_length)
+    transition_cone.translate(FreeCAD.Vector(0, 0, WALL_THICKNESS))
 
-    adapter_body = flange.fuse(outer_pipe).fuse(insertion_neck)
+    adapter_body = flange.fuse(outer_pipe).fuse(insertion_neck).fuse(transition_cone)
     
     
     import math
