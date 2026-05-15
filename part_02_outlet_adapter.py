@@ -45,8 +45,8 @@ def create_outlet_adapter():
     # 2a. Add outer detent lugs/clips
     def make_outer_lug(r, z_pos):
         import math
-        lug_length = 12.0
-        lug_height = 4.0
+        lug_length = 8.0
+        lug_height = 2.5
         lug_width = 15.0
         
         v1 = FreeCAD.Vector(r, 0, z_pos)
@@ -128,7 +128,7 @@ def create_outlet_adapter():
         cutter = Part.makeCylinder(t_radius + 5.0, t_pitch + 2.0, FreeCAD.Vector(0,0, t_length - 1))
         res = res.cut(cutter.cut(chamfer))
         chamfer_start = Part.makeCone(t_r_inner, t_radius + 2.0, t_pitch/2 + 1, FreeCAD.Vector(0,0, 0))
-        cutter_start = Part.makeCylinder(t_radius + 5.0, t_pitch + 2.0, FreeCAD.Vector(0,0, -1))
+        cutter_start = Part.makeCylinder(t_radius + 5.0, t_pitch + 4.0, FreeCAD.Vector(0,0, -t_pitch))
         res = res.cut(cutter_start.cut(chamfer_start))
         
         try: res = res.removeSplitter()

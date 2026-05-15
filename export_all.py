@@ -17,6 +17,8 @@ def run_part_scripts():
     part_files = sorted(glob.glob(os.path.join(script_dir, "part_*.py")))
     if os.path.exists(os.path.join(script_dir, "assembly.py")):
         part_files.append(os.path.join(script_dir, "assembly.py"))
+    if os.path.exists(os.path.join(script_dir, "assembly_pvc.py")):
+        part_files.append(os.path.join(script_dir, "assembly_pvc.py"))
     
     if not part_files:
         print("No part_*.py files found in the current directory.")
@@ -88,5 +90,5 @@ def run_part_scripts():
     print(f"Finished! Successfully ran {success_count}/{len(part_files)} scripts.")
     print(f"Generated STL and STEP files should be in the exports/ directory.")
 
-if __name__ == "__main__":
+if __name__ in ("__main__", "export_all"):
     run_part_scripts()

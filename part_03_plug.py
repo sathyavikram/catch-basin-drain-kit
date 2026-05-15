@@ -82,7 +82,7 @@ def create_plug():
         cutter = Part.makeCylinder(t_radius + 5.0, t_pitch + 2.0, FreeCAD.Vector(0,0, t_length - 1))
         res = res.cut(cutter.cut(chamfer))
         chamfer_start = Part.makeCone(t_r_inner, t_radius + 2.0, t_pitch/2 + 1, FreeCAD.Vector(0,0, 0))
-        cutter_start = Part.makeCylinder(t_radius + 5.0, t_pitch + 2.0, FreeCAD.Vector(0,0, -1))
+        cutter_start = Part.makeCylinder(t_radius + 5.0, t_pitch + 4.0, FreeCAD.Vector(0,0, -t_pitch))
         res = res.cut(cutter_start.cut(chamfer_start))
         
         try: res = res.removeSplitter()

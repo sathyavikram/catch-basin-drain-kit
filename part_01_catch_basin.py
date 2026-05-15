@@ -126,11 +126,6 @@ def create_basin():
     
     basin_body = basin_body.cut(t1).cut(t2)
     
-    # Bottom Cutout Guide
-    bottom_cut = Part.makeCylinder(OUTLET_DIAMETER / 2, WALL_THICKNESS - CUTOUT_GUIDE_THICKNESS)
-    bottom_cut.translate(FreeCAD.Vector(BASIN_SIZE/2, BASIN_SIZE/2, -0.1))
-    basin_body = basin_body.cut(bottom_cut)
-    
 
     
 
